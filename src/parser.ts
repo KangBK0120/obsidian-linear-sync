@@ -35,8 +35,8 @@ export function parseDocument(content: string): DocumentSection[] {
       };
       bodyLines = [];
     } else if (currentSection) {
-      // Skip metadata lines (e.g., "> Created: 2024-01-15")
-      if (line.startsWith("> Created:")) {
+      // Skip metadata lines (e.g., "> Created: 2024-01-15", "> Completed: 2024-01-20")
+      if (line.startsWith("> Created:") || line.startsWith("> Completed:")) {
         continue;
       }
       bodyLines.push(line);
@@ -83,7 +83,13 @@ export function prependSections(content: string, issues: LinearIssue[]): string 
   }
 
   const newSections = issues
-    .map((issue) => `# [${issue.identifier}] ${issue.title}\n> Created: ${formatDate(issue.createdAt)}\n\n`)
+    .map((issue) => {
+      let meta = `> Created: ${formatDate(issue.createdAt)}`;
+      if (issue.completedAt) {
+        meta += `\n> Completed: ${formatDate(issue.completedAt)}`;
+      }
+      return `# [${issue.identifier}] ${issue.title}\n${meta}\n\n`;
+    })
     .join("");
 
   return newSections + content;
