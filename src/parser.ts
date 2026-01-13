@@ -101,3 +101,42 @@ export function prependSections(content: string, issues: LinearIssue[]): string 
 export function formatIssueSection(issue: LinearIssue): string {
   return `# [${issue.identifier}] ${issue.title}\n\n`;
 }
+
+/**
+ * Build metadata lines for an issue.
+ */
+function buildMetadata(issue: LinearIssue): string {
+  let meta = `> Created: ${formatDate(issue.createdAt)}`;
+  if (issue.completedAt) {
+    meta += `\n> Completed: ${formatDate(issue.completedAt)}`;
+  }
+  return meta;
+}
+
+/**
+ * Update metadata for existing issues in the document.
+ */
+export function updateMetadata(content: string, issues: LinearIssue[]): string {
+  let updatedContent = content;
+
+  for (const issue of issues) {
+    // Match: # [KEY] Title followed by optional metadata lines
+    const pattern = new RegExp(
+      `(#\\s+\\[${escapeRegex(issue.identifier)}\\]\\s+[^\\n]+\\n)((?:>\\s*(?:Created|Completed):[^\\n]*\\n)*)`,
+      "g"
+    );
+
+    const newMeta = buildMetadata(issue);
+
+    updatedContent = updatedContent.replace(pattern, `$1${newMeta}\n`);
+  }
+
+  return updatedContent;
+}
+
+/**
+ * Escape special regex characters.
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}

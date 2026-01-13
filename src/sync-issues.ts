@@ -1,7 +1,7 @@
 import { App, TFile } from "obsidian";
 import type { LinearApiClient } from "./linear-api";
 import type { LinearSyncSettings } from "./settings";
-import { extractExistingKeys, prependSections } from "./parser";
+import { extractExistingKeys, prependSections, updateMetadata } from "./parser";
 
 export async function syncIssuesToDocument(
   app: App,
@@ -38,18 +38,18 @@ export async function syncIssuesToDocument(
   // 3. Extract existing issue keys from the document
   const existingKeys = extractExistingKeys(content);
 
-  // 4. Filter to only new issues
+  // 4. Separate new and existing issues
   const newIssues = issues.filter((issue) => !existingKeys.has(issue.identifier));
+  const existingIssues = issues.filter((issue) => existingKeys.has(issue.identifier));
 
-  if (newIssues.length === 0) {
-    return;
-  }
+  // 5. Update metadata for existing issues
+  let updatedContent = updateMetadata(content, existingIssues);
 
-  // 5. Prepend new sections to the document
-  const newContent = prependSections(content, newIssues);
+  // 6. Prepend new sections to the document
+  updatedContent = prependSections(updatedContent, newIssues);
 
-  // 6. Save the file
-  if (file instanceof TFile) {
-    await app.vault.modify(file, newContent);
+  // 7. Save the file if changed
+  if (file instanceof TFile && updatedContent !== content) {
+    await app.vault.modify(file, updatedContent);
   }
 }
