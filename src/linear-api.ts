@@ -51,9 +51,7 @@ export class LinearApiClient {
       query {
         viewer {
           assignedIssues(
-            filter: {
-              state: { type: { nin: ["completed", "canceled"] } }
-            }
+            orderBy: createdAt
           ) {
             nodes {
               id
@@ -68,7 +66,10 @@ export class LinearApiClient {
       }
     `);
 
-    return data.viewer.assignedIssues.nodes;
+    // Sort by createdAt descending (newest first)
+    return data.viewer.assignedIssues.nodes.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   }
 
   async getIssue(id: string): Promise<LinearIssue | null> {
