@@ -1,0 +1,9 @@
+{
+  "id": "linear-sync",
+  "name": "Linear Sync",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Sync Linear issues with Obsidian documents bidirectionally",
+  "author": "",
+  "isDesktopOnly": false
+}
