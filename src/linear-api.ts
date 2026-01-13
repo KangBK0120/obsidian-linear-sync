@@ -6,6 +6,7 @@ export interface LinearIssue {
   title: string;
   description: string | null;
   url: string;
+  createdAt: string;
 }
 
 export class LinearApiClient {
@@ -60,6 +61,7 @@ export class LinearApiClient {
               title
               description
               url
+              createdAt
             }
           }
         }

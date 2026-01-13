@@ -35,6 +35,10 @@ export function parseDocument(content: string): DocumentSection[] {
       };
       bodyLines = [];
     } else if (currentSection) {
+      // Skip metadata lines (e.g., "> Created: 2024-01-15")
+      if (line.startsWith("> Created:")) {
+        continue;
+      }
       bodyLines.push(line);
     }
   }
@@ -64,6 +68,13 @@ export function extractExistingKeys(content: string): Set<string> {
 }
 
 /**
+ * Format createdAt date to YYYY-MM-DD.
+ */
+function formatDate(isoString: string): string {
+  return isoString.split("T")[0];
+}
+
+/**
  * Prepend new issue sections to the document.
  */
 export function prependSections(content: string, issues: LinearIssue[]): string {
@@ -72,7 +83,7 @@ export function prependSections(content: string, issues: LinearIssue[]): string 
   }
 
   const newSections = issues
-    .map((issue) => `# [${issue.identifier}] ${issue.title}\n\n`)
+    .map((issue) => `# [${issue.identifier}] ${issue.title}\n> Created: ${formatDate(issue.createdAt)}\n\n`)
     .join("");
 
   return newSections + content;
